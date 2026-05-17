@@ -1,0 +1,1321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>jhey.gulde // operator</title>
+<meta name="description" content="Jhey Gulde — BS Computer Science, USTP–CDO. Portfolio." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --bg:        #0B0F0E;
+    --bg-2:      #0F1413;
+    --surface:   #141A19;
+    --surface-2: #1A2221;
+    --border:    #243029;
+    --border-hi: #34453C;
+    --text:      #E4E2D8;
+    --text-dim:  #8A958F;
+    --text-mute: #4F5A55;
+    --accent:    #C8FF6B;       /* phosphor lime */
+    --accent-2:  #FFB454;       /* amber */
+    --danger:    #FF6B6B;
+    --mono: "IBM Plex Mono", ui-monospace, "JetBrains Mono", "Courier New", monospace;
+    --sans: "IBM Plex Sans", -apple-system, sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--mono);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.55;
+    font-size: 14px;
+    overflow-x: hidden;
+    font-feature-settings: "ss01", "cv01";
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* dot grid background */
+  body::before {
+    content: "";
+    position: fixed; inset: 0; z-index: 0;
+    background-image:
+      radial-gradient(circle, rgba(200, 255, 107, 0.025) 1px, transparent 1px),
+      linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.4) 100%);
+    background-size: 24px 24px, 100% 100%;
+    pointer-events: none;
+  }
+
+  /* subtle scanline */
+  body::after {
+    content: "";
+    position: fixed; inset: 0; z-index: 1;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 2px,
+      rgba(255,255,255,0.005) 2px,
+      rgba(255,255,255,0.005) 4px
+    );
+    pointer-events: none;
+  }
+
+  a { color: inherit; text-decoration: none; }
+  ul, ol { list-style: none; }
+
+  /* ============================================================
+     STATUS BAR — persistent top strip
+     ============================================================ */
+  .statusbar {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: var(--bg-2);
+    border-bottom: 1px solid var(--border);
+    height: 28px;
+    display: flex; align-items: center;
+    padding: 0 16px;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.02em;
+    gap: 20px;
+  }
+
+  .status-item { display: flex; align-items: center; gap: 6px; }
+  .status-item .label { color: var(--text-mute); }
+  .status-item .val { color: var(--text); }
+  .status-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 6px var(--accent);
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .status-right { margin-left: auto; display: flex; gap: 20px; }
+  @media (max-width: 720px) {
+    .statusbar { font-size: 10px; gap: 10px; padding: 0 10px; }
+    .status-right { gap: 10px; }
+    .status-hide-mobile { display: none; }
+  }
+
+  /* ============================================================
+     NAVIGATION
+     ============================================================ */
+  nav {
+    position: fixed; top: 28px; left: 0; right: 0; z-index: 99;
+    background: rgba(11, 15, 14, 0.92);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    height: 48px;
+    display: flex; align-items: center;
+    padding: 0 32px;
+    font-size: 12px;
+  }
+
+  .brand {
+    color: var(--accent);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+  .brand::before { content: "~/ "; color: var(--text-mute); font-weight: 400; }
+
+  .nav-links {
+    margin-left: auto;
+    display: flex; gap: 28px;
+  }
+  .nav-links a {
+    color: var(--text-dim);
+    transition: color 0.15s ease;
+    position: relative;
+  }
+  .nav-links a:hover { color: var(--accent); }
+  .nav-links a::before { content: "["; color: var(--text-mute); margin-right: 2px; opacity: 0; transition: opacity 0.15s ease; }
+  .nav-links a::after { content: "]"; color: var(--text-mute); margin-left: 2px; opacity: 0; transition: opacity 0.15s ease; }
+  .nav-links a:hover::before, .nav-links a:hover::after { opacity: 1; }
+
+  .nav-toggle {
+    display: none;
+    background: none; border: 1px solid var(--border);
+    color: var(--text); cursor: pointer;
+    padding: 4px 10px; font-family: var(--mono); font-size: 11px;
+    margin-left: auto;
+  }
+
+  /* ============================================================
+     LAYOUT WRAPPER
+     ============================================================ */
+  main {
+    position: relative; z-index: 2;
+    padding-top: 76px;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+
+  section { padding: 80px 0; position: relative; }
+  section + section { border-top: 1px dashed var(--border); }
+
+  /* section header — terminal command style */
+  .cmd {
+    display: flex; align-items: baseline; gap: 10px;
+    color: var(--text-dim);
+    font-size: 13px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+  .cmd .prompt { color: var(--accent); font-weight: 600; }
+  .cmd .verb { color: var(--text); }
+  .cmd .arg { color: var(--accent-2); }
+  .cmd .comment { color: var(--text-mute); margin-left: auto; font-size: 11px; }
+
+  .section-id {
+    display: inline-block;
+    font-size: 10px;
+    color: var(--text-mute);
+    letter-spacing: 0.15em;
+    padding: 3px 8px;
+    border: 1px solid var(--border);
+    margin-bottom: 14px;
+  }
+
+  /* ============================================================
+     HERO
+     ============================================================ */
+  .hero {
+    padding-top: 64px;
+    padding-bottom: 100px;
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+
+  .hero-meta-top {
+    font-size: 11px;
+    color: var(--text-mute);
+    margin-bottom: 24px;
+    letter-spacing: 0.1em;
+  }
+  .hero-meta-top .accent { color: var(--accent); }
+
+  .hero h1 {
+    font-family: var(--mono);
+    font-size: clamp(2.5rem, 6.5vw, 5.5rem);
+    font-weight: 600;
+    line-height: 1.02;
+    letter-spacing: -0.04em;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .hero h1 .sub {
+    display: block;
+    color: var(--accent);
+    font-weight: 400;
+  }
+
+  .hero h1 .cursor {
+    display: inline-block;
+    width: 0.5em;
+    height: 0.85em;
+    background: var(--accent);
+    margin-left: 0.1em;
+    vertical-align: -0.05em;
+    animation: blink 1.1s steps(1) infinite;
+  }
+  @keyframes blink { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0; } }
+
+  .hero-role {
+    color: var(--text-dim);
+    font-size: 13px;
+    margin-top: 18px;
+    margin-bottom: 32px;
+    max-width: 540px;
+  }
+  .hero-role .hl { color: var(--accent); }
+
+  /* hero callouts */
+  .hero-callouts {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    margin-top: 20px;
+    max-width: 540px;
+  }
+  .callout {
+    padding: 18px 18px;
+    border-right: 1px solid var(--border);
+  }
+  .callout:last-child { border-right: none; }
+  .callout .k {
+    font-size: 10px;
+    color: var(--text-mute);
+    letter-spacing: 0.15em;
+    margin-bottom: 6px;
+  }
+  .callout .v {
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .callout .v.big {
+    color: var(--accent);
+    font-size: 24px;
+    font-weight: 600;
+  }
+
+  /* hero ASCII card */
+  .ascii-card {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding: 18px 20px;
+    font-size: 12px;
+    color: var(--text-dim);
+    position: relative;
+  }
+  .ascii-card::before {
+    content: "[ id_card.txt ]";
+    position: absolute;
+    top: -10px; left: 14px;
+    background: var(--bg);
+    padding: 0 8px;
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+  }
+  .ascii-card .row { display: flex; padding: 5px 0; border-bottom: 1px dashed var(--border); }
+  .ascii-card .row:last-child { border-bottom: none; }
+  .ascii-card .row .k { color: var(--text-mute); width: 120px; flex-shrink: 0; }
+  .ascii-card .row .v { color: var(--text); }
+  .ascii-card .row .v.accent { color: var(--accent); }
+
+  .ascii-art {
+    color: var(--accent);
+    font-size: 10px;
+    line-height: 1.1;
+    margin-top: 18px;
+    white-space: pre;
+    opacity: 0.7;
+    overflow: hidden;
+  }
+
+  /* ============================================================
+     ABOUT
+     ============================================================ */
+  .about-grid {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+
+  .photo-frame {
+    aspect-ratio: 3/4;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    position: relative;
+    overflow: hidden;
+  }
+  .photo-frame::before {
+    content: "";
+    position: absolute; inset: 8px;
+    border: 1px dashed var(--border-hi);
+    z-index: 1;
+  }
+  .photo-frame img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(0.2) contrast(1.05);
+  }
+  /* corner crosshairs */
+  .crosshair { position: absolute; width: 10px; height: 10px; z-index: 2; }
+  .crosshair::before, .crosshair::after {
+    content: ""; position: absolute; background: var(--accent);
+  }
+  .crosshair::before { width: 10px; height: 1px; top: 0; left: 0; }
+  .crosshair::after { width: 1px; height: 10px; top: 0; left: 0; }
+  .crosshair.tl { top: 4px; left: 4px; }
+  .crosshair.tr { top: 4px; right: 4px; transform: rotate(90deg); }
+  .crosshair.bl { bottom: 4px; left: 4px; transform: rotate(-90deg); }
+  .crosshair.br { bottom: 4px; right: 4px; transform: rotate(180deg); }
+
+  .about-text p {
+    font-family: var(--sans);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.7;
+    margin-bottom: 16px;
+    max-width: 60ch;
+  }
+  .about-text p .hl { color: var(--accent); font-family: var(--mono); font-size: 0.9em; }
+
+  .about-meta {
+    margin-top: 32px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0;
+    border: 1px solid var(--border);
+  }
+  .meta-row {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    font-size: 12px;
+  }
+  .meta-row:nth-child(2n) { border-right: none; }
+  .meta-row:nth-last-child(-n+2) { border-bottom: none; }
+  .meta-row .k { color: var(--text-mute); font-size: 10px; letter-spacing: 0.15em; margin-bottom: 4px; }
+  .meta-row .v { color: var(--text); }
+
+  /* ============================================================
+     PROJECTS
+     ============================================================ */
+  .projects {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    border: 1px solid var(--border);
+  }
+  .project {
+    display: grid;
+    grid-template-columns: 80px 1fr 200px;
+    gap: 24px;
+    padding: 24px 28px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.2s ease;
+    position: relative;
+  }
+  .project:last-child { border-bottom: none; }
+  .project:hover { background: var(--surface); }
+  .project:hover .proj-arrow { color: var(--accent); transform: translateX(4px); }
+
+  .proj-id {
+    font-size: 11px;
+    color: var(--text-mute);
+    padding-top: 2px;
+    letter-spacing: 0.1em;
+  }
+  .proj-id .num { color: var(--accent); display: block; font-size: 18px; font-weight: 600; }
+
+  .proj-body { min-width: 0; }
+  .proj-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+    letter-spacing: -0.01em;
+  }
+  .proj-title .featured {
+    display: inline-block;
+    background: var(--accent);
+    color: var(--bg);
+    font-size: 9px;
+    padding: 2px 6px;
+    margin-left: 8px;
+    vertical-align: 3px;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+  }
+  .proj-desc {
+    color: var(--text-dim);
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 12px;
+    max-width: 70ch;
+  }
+  .proj-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .tag {
+    font-size: 10px;
+    color: var(--text-dim);
+    padding: 3px 8px;
+    border: 1px solid var(--border);
+    letter-spacing: 0.05em;
+  }
+  .tag.accent { color: var(--accent); border-color: var(--accent); }
+  .tag.link:hover { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+
+  .proj-meta-right {
+    text-align: right;
+    font-size: 10px;
+    color: var(--text-mute);
+    letter-spacing: 0.1em;
+    padding-top: 2px;
+  }
+  .proj-meta-right .status {
+    display: inline-block;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .proj-meta-right .status::before {
+    content: "● ";
+  }
+  .proj-meta-right .status.archive { color: var(--text-dim); }
+  .proj-meta-right .date { display: block; color: var(--text-dim); }
+  .proj-arrow {
+    display: block; margin-top: 12px;
+    color: var(--text-mute);
+    font-family: var(--mono);
+    transition: transform 0.2s ease, color 0.2s ease;
+  }
+
+  /* ============================================================
+     SKILLS
+     ============================================================ */
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border: 1px solid var(--border);
+  }
+  .skill-block {
+    padding: 24px 24px;
+    border-right: 1px solid var(--border);
+  }
+  .skill-block:last-child { border-right: none; }
+
+  .skill-block h3 {
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .skill-block h3::before { content: "// "; color: var(--text-mute); }
+
+  .skill-row {
+    margin-bottom: 14px;
+    font-size: 12px;
+  }
+  .skill-row .top {
+    display: flex; justify-content: space-between;
+    margin-bottom: 4px;
+    color: var(--text);
+  }
+  .skill-row .top .lvl { color: var(--text-mute); font-size: 10px; letter-spacing: 0.1em; }
+
+  /* ASCII-style progress bar */
+  .bar {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .bar .filled { color: var(--accent); }
+  .bar .empty { color: var(--text-mute); }
+
+  /* ============================================================
+     ACHIEVEMENTS — log style
+     ============================================================ */
+  .logs {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding: 8px 0;
+  }
+  .log-row {
+    display: grid;
+    grid-template-columns: 100px 60px 1fr;
+    gap: 16px;
+    padding: 10px 24px;
+    font-size: 12px;
+    border-bottom: 1px dashed var(--border);
+    transition: background 0.15s ease;
+  }
+  .log-row:last-child { border-bottom: none; }
+  .log-row:hover { background: var(--surface-2); }
+
+  .log-time { color: var(--text-mute); font-size: 11px; }
+  .log-level {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    padding: 2px 6px;
+    text-align: center;
+    height: fit-content;
+    align-self: start;
+    margin-top: 1px;
+  }
+  .log-level.info { color: var(--accent); border: 1px solid var(--accent); }
+  .log-level.note { color: var(--accent-2); border: 1px solid var(--accent-2); }
+  .log-level.bronze { color: var(--text-dim); border: 1px solid var(--text-dim); }
+
+  .log-msg .title { color: var(--text); display: block; margin-bottom: 2px; }
+  .log-msg .src { color: var(--text-mute); font-size: 11px; }
+
+  /* ============================================================
+     JOURNAL
+     ============================================================ */
+  .journal-note {
+    border: 1px dashed var(--accent-2);
+    padding: 12px 16px;
+    background: rgba(255, 180, 84, 0.04);
+    color: var(--text-dim);
+    font-size: 11px;
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+  .journal-note .warn { color: var(--accent-2); font-weight: 600; }
+
+  .journal-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0;
+    border: 1px solid var(--border);
+  }
+  .journal-entry {
+    padding: 24px 24px;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-2);
+  }
+  .journal-entry:nth-child(2n) { border-right: none; }
+  .journal-entry:nth-last-child(-n+2) { border-bottom: none; }
+  @media (max-width: 720px) {
+    .journal-entry { border-right: none; }
+    .journal-entry:nth-last-child(2) { border-bottom: 1px solid var(--border); }
+  }
+
+  .entry-head {
+    display: flex; align-items: baseline; gap: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed var(--border);
+    margin-bottom: 12px;
+    font-size: 11px;
+    color: var(--text-mute);
+    letter-spacing: 0.05em;
+  }
+  .entry-head .dt { color: var(--accent); font-weight: 600; }
+  .entry-head .hrs { margin-left: auto; color: var(--accent-2); }
+  .entry-title { font-size: 14px; color: var(--text); margin-bottom: 8px; font-weight: 500; }
+  .entry-body { font-size: 12px; color: var(--text-dim); line-height: 1.65; }
+
+  .dtr-summary {
+    margin-top: 24px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .sum-cell {
+    padding: 20px 20px;
+    border-right: 1px solid var(--border);
+    text-align: left;
+  }
+  .sum-cell:last-child { border-right: none; }
+  .sum-cell .k { font-size: 10px; color: var(--text-mute); letter-spacing: 0.15em; margin-bottom: 8px; }
+  .sum-cell .v { font-size: 28px; color: var(--accent); font-weight: 600; line-height: 1; }
+  @media (max-width: 720px) {
+    .dtr-summary { grid-template-columns: 1fr 1fr; }
+    .sum-cell:nth-child(2) { border-right: none; }
+    .sum-cell:nth-child(1), .sum-cell:nth-child(2) { border-bottom: 1px solid var(--border); }
+  }
+
+  /* ============================================================
+     CONTACT
+     ============================================================ */
+  .contact-block {
+    border: 1px solid var(--border);
+    padding: 36px 40px;
+    background: var(--surface);
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 48px;
+    align-items: center;
+    position: relative;
+  }
+  .contact-block::before {
+    content: "$ ssh contact@jhey.dev";
+    position: absolute; top: -10px; left: 28px;
+    background: var(--bg);
+    padding: 0 10px;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+
+  .contact-headline {
+    font-size: clamp(1.5rem, 3vw, 2.25rem);
+    color: var(--text);
+    font-weight: 500;
+    line-height: 1.2;
+    margin-bottom: 18px;
+    letter-spacing: -0.02em;
+  }
+  .contact-headline .hl { color: var(--accent); }
+  .contact-sub { color: var(--text-dim); font-size: 13px; margin-bottom: 24px; max-width: 40ch; }
+
+  .cta {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--accent);
+    color: var(--bg);
+    padding: 12px 22px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    border: none;
+    transition: background 0.2s ease;
+  }
+  .cta:hover { background: var(--text); }
+  .cta::after { content: "→"; }
+
+  .contact-info {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    font-size: 12px;
+  }
+  .ci-row {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--border);
+  }
+  .ci-row:last-child { border-bottom: none; }
+  .ci-row .k { color: var(--text-mute); font-size: 10px; letter-spacing: 0.15em; padding-top: 2px; }
+  .ci-row .v { color: var(--text); }
+  .ci-row .v a { border-bottom: 1px solid var(--border); transition: border-color 0.15s ease, color 0.15s ease; }
+  .ci-row .v a:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* ============================================================
+     FOOTER
+     ============================================================ */
+  footer {
+    padding: 32px 0 40px;
+    margin-top: 40px;
+    border-top: 1px dashed var(--border);
+    font-size: 11px;
+    color: var(--text-mute);
+    display: flex; justify-content: space-between;
+    letter-spacing: 0.05em;
+  }
+  footer .end::before { content: "// "; color: var(--text-mute); }
+
+  /* ============================================================
+     RESPONSIVE
+     ============================================================ */
+  @media (max-width: 900px) {
+    main { padding-left: 16px; padding-right: 16px; padding-top: 64px; }
+    nav { padding: 0 16px; }
+    .nav-links {
+      display: none;
+      position: absolute; top: 100%; left: 0; right: 0;
+      background: var(--bg-2);
+      flex-direction: column;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-links.open { display: flex; }
+    .nav-links a { padding: 12px 20px; border-bottom: 1px solid var(--border); }
+    .nav-toggle { display: block; }
+    .brand { font-size: 13px; }
+
+    section { padding: 60px 0; }
+
+    .hero { grid-template-columns: 1fr; gap: 36px; padding-top: 36px; padding-bottom: 60px; }
+    .about-grid { grid-template-columns: 1fr; gap: 28px; }
+    .photo-frame { max-width: 280px; }
+
+    .project { grid-template-columns: 1fr; gap: 8px; padding: 20px; }
+    .proj-meta-right { text-align: left; }
+    .proj-arrow { display: none; }
+
+    .skills-grid { grid-template-columns: 1fr; }
+    .skill-block { border-right: none; border-bottom: 1px solid var(--border); }
+    .skill-block:last-child { border-bottom: none; }
+
+    .log-row { grid-template-columns: 1fr; gap: 4px; padding: 14px 18px; }
+
+    .journal-grid { grid-template-columns: 1fr; }
+
+    .contact-block { grid-template-columns: 1fr; padding: 28px 22px; gap: 24px; }
+
+    .hero-callouts { max-width: 100%; }
+
+    .ascii-art { display: none; }
+
+    footer { flex-direction: column; gap: 8px; padding: 24px 0; }
+  }
+
+  @media (max-width: 480px) {
+    .hero-callouts { grid-template-columns: 1fr; }
+    .callout { border-right: none; border-bottom: 1px solid var(--border); }
+    .callout:last-child { border-bottom: none; }
+    .about-meta { grid-template-columns: 1fr; }
+    .meta-row { border-right: none !important; }
+  }
+
+  /* fade-in */
+  .fade-in { opacity: 0; transform: translateY(12px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .fade-in.visible { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- ========== STATUS BAR ========== -->
+<div class="statusbar">
+  <div class="status-item"><span class="status-dot"></span><span class="val">ONLINE</span></div>
+  <div class="status-item status-hide-mobile"><span class="label">user:</span><span class="val">jhey.gulde</span></div>
+  <div class="status-item status-hide-mobile"><span class="label">node:</span><span class="val">ustp-cdo</span></div>
+  <div class="status-right">
+    <div class="status-item"><span class="label">tty:</span><span class="val">/dev/portfolio</span></div>
+    <div class="status-item status-hide-mobile"><span class="label">build:</span><span class="val">2026.01</span></div>
+  </div>
+</div>
+
+<!-- ========== NAV ========== -->
+<nav>
+  <div class="brand">jhey.gulde</div>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#about">about</a></li>
+    <li><a href="#work">work</a></li>
+    <li><a href="#skills">skills</a></li>
+    <li><a href="#logs">logs</a></li>
+    <li><a href="#journal">journal</a></li>
+    <li><a href="#contact">contact</a></li>
+  </ul>
+  <button class="nav-toggle" id="navToggle" aria-label="menu">[ menu ]</button>
+</nav>
+
+<main>
+
+<!-- ========== HERO ========== -->
+<section class="hero">
+  <div>
+    <div class="hero-meta-top">
+      <span class="accent">●</span> &nbsp;BSCS_3RD_YR &nbsp;//&nbsp; USTP-CDO &nbsp;//&nbsp; OJT_CANDIDATE_2026
+    </div>
+    <h1>jhey<br/><span class="sub">.gulde<span class="cursor"></span></span></h1>
+    <p class="hero-role">
+      Computer Science student at <span class="hl">USTP–CDO</span> building software, leading student initiatives, and tinkering with machine learning. Looking for an On-the-Job Training placement where I can ship real code and learn from real engineers.
+    </p>
+
+    <div class="hero-callouts">
+      <div class="callout">
+        <div class="k">DEAN'S LISTER</div>
+        <div class="v big">04</div>
+      </div>
+      <div class="callout">
+        <div class="k">PROJECTS</div>
+        <div class="v big">07</div>
+      </div>
+      <div class="callout">
+        <div class="k">CERT_LVL</div>
+        <div class="v big">TOPCIT-1</div>
+      </div>
+    </div>
+  </div>
+
+  <aside>
+    <div class="ascii-card">
+      <div class="row"><span class="k">NAME</span><span class="v">Jhey Gulde</span></div>
+      <div class="row"><span class="k">COURSE</span><span class="v">BS Computer Science</span></div>
+      <div class="row"><span class="k">YEAR</span><span class="v">3 / 4</span></div>
+      <div class="row"><span class="k">CAMPUS</span><span class="v">USTP–CDO</span></div>
+      <div class="row"><span class="k">LOCATION</span><span class="v">Cagayan de Oro, PH</span></div>
+      <div class="row"><span class="k">LANGUAGES</span><span class="v">ceb · en · fil</span></div>
+      <div class="row"><span class="k">STATUS</span><span class="v accent">AVAILABLE_FOR_OJT</span></div>
+    </div>
+
+<pre class="ascii-art">
+   ┌──────────────────────────────┐
+   │  jhey20-sys @ github         │
+   │  3rd yr · cs · ustp · cdo    │
+   └──────────────────────────────┘
+        ↓ keep scrolling ↓
+</pre>
+  </aside>
+</section>
+
+<!-- ========== ABOUT ========== -->
+<section id="about">
+  <div class="section-id">SEC_01</div>
+  <div class="cmd">
+    <span class="prompt">$</span>
+    <span class="verb">cat</span>
+    <span class="arg">about.md</span>
+    <span class="comment"># who am i</span>
+  </div>
+
+  <div class="about-grid">
+    <div class="photo-frame">
+      <img src="me2.jpg" alt="Jhey Gulde" />
+      <span class="crosshair tl"></span>
+      <span class="crosshair tr"></span>
+      <span class="crosshair bl"></span>
+      <span class="crosshair br"></span>
+    </div>
+
+    <div class="about-text">
+      <p>A third-year <span class="hl">CS</span> student aiming to build strong foundations in software development, problem-solving, and emerging technologies.</p>
+      <p>Motivated by continuous learning, I'm building toward becoming a competent engineer who can ship real things that improve everyday life. Outside class, I lead student-run community projects — from tutoring fellow scholars to coordinating outreach programs — and I bring that same collaborative energy into every team I join.</p>
+      <p>Currently exploring <span class="hl">machine learning</span> through my <code style="color: var(--accent-2);">road-quality-ai</code> project, and getting comfortable shipping work through Git and GitHub.</p>
+
+      <div class="about-meta">
+        <div class="meta-row"><div class="k">COURSE</div><div class="v">BS Computer Science</div></div>
+        <div class="meta-row"><div class="k">UNIVERSITY</div><div class="v">USTP — CDO Campus</div></div>
+        <div class="meta-row"><div class="k">YEAR_LEVEL</div><div class="v">3rd Year · 2023–Present</div></div>
+        <div class="meta-row"><div class="k">SPEAKS</div><div class="v">Cebuano · English · Filipino</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== WORK / PROJECTS ========== -->
+<section id="work">
+  <div class="section-id">SEC_02</div>
+  <div class="cmd">
+    <span class="prompt">$</span>
+    <span class="verb">ls</span>
+    <span class="arg">~/projects</span>
+    <span class="comment"># things i've built &amp; led</span>
+  </div>
+
+  <div class="projects">
+
+    <div class="project">
+      <div class="proj-id">PROJ<span class="num">001</span></div>
+      <div class="proj-body">
+        <div class="proj-title">road-quality-ai <span class="featured">FEATURED</span></div>
+        <div class="proj-desc">A machine learning project applying Python to road-quality assessment — built as a Performance Indicator Task (PIT). Published as a public GitHub repository for ongoing iteration.</div>
+        <div class="proj-tags">
+          <span class="tag accent">Python</span>
+          <span class="tag">Machine Learning</span>
+          <span class="tag">PIT</span>
+          <a href="https://github.com/Jhey20-sys/road-quality-ai" target="_blank" rel="noopener" class="tag link">github ↗</a>
+        </div>
+      </div>
+      <div class="proj-meta-right">
+        <span class="status">PUBLIC</span>
+        <span class="date">2025</span>
+        <span class="proj-arrow">→</span>
+      </div>
+    </div>
+
+    <div class="project">
+      <div class="proj-id">PROJ<span class="num">002</span></div>
+      <div class="proj-body">
+        <div class="proj-title">Project Akbay</div>
+        <div class="proj-desc">Project Head under the University Student Government, USTP–CDO. Leading planning, coordination, and rollout of an initiative supporting fellow students.</div>
+        <div class="proj-tags">
+          <span class="tag">Project Lead</span>
+          <span class="tag">USG USTP–CDO</span>
+        </div>
+      </div>
+      <div class="proj-meta-right">
+        <span class="status">ACTIVE</span>
+        <span class="date">2025 — present</span>
+        <span class="proj-arrow">→</span>
+      </div>
+    </div>
+
+    <div class="project">
+      <div class="proj-id">PROJ<span class="num">003</span></div>
+      <div class="proj-body">
+        <div class="proj-title">ISDA: Finding Its Purpose</div>
+        <div class="proj-desc">Project Head &amp; Tutor for "More Than Just a Scholar" — an initiative under University City Scholars dedicated to mentoring scholars and reframing what scholarship means.</div>
+        <div class="proj-tags">
+          <span class="tag">Project Head</span>
+          <span class="tag">Tutor</span>
+          <span class="tag">Mentorship</span>
+        </div>
+      </div>
+      <div class="proj-meta-right">
+        <span class="status archive">SHIPPED</span>
+        <span class="date">2024</span>
+        <span class="proj-arrow">→</span>
+      </div>
+    </div>
+
+    <div class="project">
+      <div class="proj-id">PROJ<span class="num">004</span></div>
+      <div class="proj-body">
+        <div class="proj-title">Pawsitive Feeding</div>
+        <div class="proj-desc">Led a community feeding program as Project Head with University City Scholars — coordinating volunteers, logistics, and outreach across Cagayan de Oro.</div>
+        <div class="proj-tags">
+          <span class="tag">Project Head</span>
+          <span class="tag">Outreach</span>
+        </div>
+      </div>
+      <div class="proj-meta-right">
+        <span class="status archive">SHIPPED</span>
+        <span class="date">2023</span>
+        <span class="proj-arrow">→</span>
+      </div>
+    </div>
+
+    <div class="project">
+      <div class="proj-id">PROJ<span class="num">005</span></div>
+      <div class="proj-body">
+        <div class="proj-title">Pagkat-on School of ISDA</div>
+        <div class="proj-desc">Tutor for Pagkat-on School under University City Scholars — providing weekly academic support to scholar-students across multiple subjects over two years.</div>
+        <div class="proj-tags">
+          <span class="tag">Tutor</span>
+          <span class="tag">Education</span>
+        </div>
+      </div>
+      <div class="proj-meta-right">
+        <span class="status">ACTIVE</span>
+        <span class="date">2023 — 2025</span>
+        <span class="proj-arrow">→</span>
+      </div>
+    </div>
+
+    <div class="project">
+      <div class="proj-id">PROJ<span class="num">006</span></div>
+      <div class="proj-body">
+        <div class="proj-title">CSS — General PIO</div>
+        <div class="proj-desc">General Public Information Officer for the Computer Science Student Society, USTP–CDO. Managed communications and information dissemination across the department.</div>
+        <div class="proj-tags">
+          <span class="tag">Communications</span>
+          <span class="tag">Department Org</span>
+        </div>
+      </div>
+      <div class="proj-meta-right">
+        <span class="status archive">SHIPPED</span>
+        <span class="date">2024</span>
+        <span class="proj-arrow">→</span>
+      </div>
+    </div>
+
+    <div class="project">
+      <div class="proj-id">PROJ<span class="num">007</span></div>
+      <div class="proj-body">
+        <div class="proj-title">Back to Basics — Mentoring Series</div>
+        <div class="proj-desc">Invited speaker at the Back to Basics Seminar and mentor in the Student-to-Student Mentoring Program, Department of Computer Science, USTP–CDO.</div>
+        <div class="proj-tags">
+          <span class="tag">Speaker</span>
+          <span class="tag">Mentor</span>
+        </div>
+      </div>
+      <div class="proj-meta-right">
+        <span class="status archive">SHIPPED</span>
+        <span class="date">2025</span>
+        <span class="proj-arrow">→</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ========== SKILLS ========== -->
+<section id="skills">
+  <div class="section-id">SEC_03</div>
+  <div class="cmd">
+    <span class="prompt">$</span>
+    <span class="verb">systemctl status</span>
+    <span class="arg">--skills</span>
+    <span class="comment"># current capabilities</span>
+  </div>
+
+  <div class="skills-grid">
+
+    <div class="skill-block">
+      <h3>code &amp; tools</h3>
+
+      <div class="skill-row">
+        <div class="top"><span>Python</span><span class="lvl">FAMILIAR</span></div>
+        <div class="bar"><span class="filled">████████</span><span class="empty">░░░░░░░░</span></div>
+      </div>
+      <div class="skill-row">
+        <div class="top"><span>C++</span><span class="lvl">FAMILIAR</span></div>
+        <div class="bar"><span class="filled">███████</span><span class="empty">░░░░░░░░░</span></div>
+      </div>
+      <div class="skill-row">
+        <div class="top"><span>Git / GitHub</span><span class="lvl">FAMILIAR</span></div>
+        <div class="bar"><span class="filled">████████</span><span class="empty">░░░░░░░░</span></div>
+      </div>
+      <div class="skill-row">
+        <div class="top"><span>Algorithm Design</span><span class="lvl">FAMILIAR</span></div>
+        <div class="bar"><span class="filled">███████</span><span class="empty">░░░░░░░░░</span></div>
+      </div>
+      <div class="skill-row">
+        <div class="top"><span>Optimization</span><span class="lvl">FAMILIAR</span></div>
+        <div class="bar"><span class="filled">██████</span><span class="empty">██░░░░░░░░</span></div>
+      </div>
+    </div>
+
+    <div class="skill-block">
+      <h3>research</h3>
+
+      <div class="skill-row">
+        <div class="top"><span>Quantitative Research</span><span class="lvl">FAMILIAR</span></div>
+        <div class="bar"><span class="filled">████████</span><span class="empty">░░░░░░░░</span></div>
+      </div>
+      <div class="skill-row">
+        <div class="top"><span>Statistical Testing</span><span class="lvl">PROFICIENT</span></div>
+        <div class="bar"><span class="filled">██████████</span><span class="empty">░░░░░░</span></div>
+      </div>
+      <div class="skill-row">
+        <div class="top"><span>Hypothesis Testing</span><span class="lvl">PROFICIENT</span></div>
+        <div class="bar"><span class="filled">██████████</span><span class="empty">░░░░░░</span></div>
+      </div>
+      <div class="skill-row">
+        <div class="top"><span>Data Interpretation</span><span class="lvl">FAMILIAR</span></div>
+        <div class="bar"><span class="filled">████████</span><span class="empty">░░░░░░░░</span></div>
+      </div>
+      <div class="skill-row">
+        <div class="top"><span>Comparative Analysis</span><span class="lvl">FAMILIAR</span></div>
+        <div class="bar"><span class="filled">████████</span><span class="empty">░░░░░░░░</span></div>
+      </div>
+    </div>
+
+    <div class="skill-block">
+      <h3>human ops</h3>
+
+      <div class="skill-row">
+        <div class="top"><span>Project Planning</span><span class="lvl">STRONG</span></div>
+        <div class="bar"><span class="filled">████████████</span><span class="empty">░░░░</span></div>
+      </div>
+      <div class="skill-row">
+        <div class="top"><span>Team Coordination</span><span class="lvl">STRONG</span></div>
+        <div class="bar"><span class="filled">████████████</span><span class="empty">░░░░</span></div>
+      </div>
+      <div class="skill-row">
+        <div class="top"><span>Communication</span><span class="lvl">STRONG</span></div>
+        <div class="bar"><span class="filled">████████████</span><span class="empty">░░░░</span></div>
+      </div>
+      <div class="skill-row">
+        <div class="top"><span>Critical Thinking</span><span class="lvl">STRONG</span></div>
+        <div class="bar"><span class="filled">████████████</span><span class="empty">░░░░</span></div>
+      </div>
+      <div class="skill-row">
+        <div class="top"><span>Time Management</span><span class="lvl">STRONG</span></div>
+        <div class="bar"><span class="filled">███████████</span><span class="empty">░░░░░</span></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ========== LOGS / ACHIEVEMENTS ========== -->
+<section id="logs">
+  <div class="section-id">SEC_04</div>
+  <div class="cmd">
+    <span class="prompt">$</span>
+    <span class="verb">tail -n 20</span>
+    <span class="arg">/var/log/achievements.log</span>
+    <span class="comment"># awards &amp; recognition</span>
+  </div>
+
+  <div class="logs">
+    <div class="log-row">
+      <div class="log-time">2025-Q4</div>
+      <div class="log-level info">AWARD</div>
+      <div class="log-msg"><span class="title">Outstanding Project of the Year — Kahamili Awards</span><span class="src">4-H Club · USTP–CDO</span></div>
+    </div>
+    <div class="log-row">
+      <div class="log-time">2025-Q4</div>
+      <div class="log-level info">AWARD</div>
+      <div class="log-msg"><span class="title">Outstanding Unit Organization — Kahamili Awards</span><span class="src">4-H Club · USTP–CDO</span></div>
+    </div>
+    <div class="log-row">
+      <div class="log-time">2025</div>
+      <div class="log-level note">RECOG</div>
+      <div class="log-msg"><span class="title">Saulog Awards — Certificate of Recognition (4-H Officer)</span><span class="src">USTP–CDO</span></div>
+    </div>
+    <div class="log-row">
+      <div class="log-time">2024</div>
+      <div class="log-level info">CERT</div>
+      <div class="log-msg"><span class="title">TOPCIT Level 1 — Practical IT Competency</span><span class="src">Test of Practical Competency in IT, 2024</span></div>
+    </div>
+    <div class="log-row">
+      <div class="log-time">2023→25</div>
+      <div class="log-level info">ACAD</div>
+      <div class="log-msg"><span class="title">Dean's Lister — 4 Semesters</span><span class="src">Department of Computer Science · USTP–CDO</span></div>
+    </div>
+    <div class="log-row">
+      <div class="log-time">2023</div>
+      <div class="log-level note">COMP</div>
+      <div class="log-msg"><span class="title">Debate First Runner Up — Scholars Cup</span><span class="src">City Scholars · Cagayan de Oro</span></div>
+    </div>
+    <div class="log-row">
+      <div class="log-time">2022–23</div>
+      <div class="log-level note">COMP</div>
+      <div class="log-msg"><span class="title">Debate Champion — SHS-STEM 12</span><span class="src">Lourdes College</span></div>
+    </div>
+    <div class="log-row">
+      <div class="log-time">2023</div>
+      <div class="log-level bronze">ACAD</div>
+      <div class="log-msg"><span class="title">With High Honors — Rank 3 Overall Batch (SHS-STEM)</span><span class="src">Lourdes College · Senior High</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== JOURNAL ========== -->
+<section id="journal">
+  <div class="section-id">SEC_05</div>
+  <div class="cmd">
+    <span class="prompt">$</span>
+    <span class="verb">tail -f</span>
+    <span class="arg">~/ojt/journal.log</span>
+    <span class="comment"># daily entries during OJT</span>
+  </div>
+
+  <div class="journal-note">
+    <span class="warn">[ TODO ]</span> The entries below are placeholders showing the format. Replace each one with a real OJT entry once the training begins. Update the totals in the summary bar (hours, days, tasks) along the way.
+  </div>
+
+  <div class="journal-grid">
+    <div class="journal-entry">
+      <div class="entry-head">
+        <span class="dt">[DD-MMM-YYYY]</span>
+        <span>day_01</span>
+        <span class="hrs">+0.0h</span>
+      </div>
+      <div class="entry-title">onboarding &amp; environment setup</div>
+      <div class="entry-body">[Replace with what you actually did on day one: who you met, what tools you set up, first impressions.]</div>
+    </div>
+
+    <div class="journal-entry">
+      <div class="entry-head">
+        <span class="dt">[DD-MMM-YYYY]</span>
+        <span>day_NN</span>
+        <span class="hrs">+0.0h</span>
+      </div>
+      <div class="entry-title">first task shipped</div>
+      <div class="entry-body">[Replace with the first task you finished — what tools or language you used, what you learned.]</div>
+    </div>
+
+    <div class="journal-entry">
+      <div class="entry-head">
+        <span class="dt">[DD-MMM-YYYY]</span>
+        <span>day_NN</span>
+        <span class="hrs">+0.0h</span>
+      </div>
+      <div class="entry-title">debugging session</div>
+      <div class="entry-body">[Replace with a moment something didn't work the way you expected. What did you try? Who helped? Takeaway?]</div>
+    </div>
+
+    <div class="journal-entry">
+      <div class="entry-head">
+        <span class="dt">[DD-MMM-YYYY]</span>
+        <span>day_NN</span>
+        <span class="hrs">+0.0h</span>
+      </div>
+      <div class="entry-title">milestone &amp; feedback</div>
+      <div class="entry-body">[Replace with a milestone, demo, or notable feedback from your supervisor. Keep it specific — future-you will appreciate the detail.]</div>
+    </div>
+  </div>
+
+  <div class="dtr-summary">
+    <div class="sum-cell">
+      <div class="k">TOTAL_HOURS</div>
+      <div class="v">000</div>
+    </div>
+    <div class="sum-cell">
+      <div class="k">DAYS_LOGGED</div>
+      <div class="v">000</div>
+    </div>
+    <div class="sum-cell">
+      <div class="k">TASKS_DONE</div>
+      <div class="v">000</div>
+    </div>
+    <div class="sum-cell">
+      <div class="k">STATUS</div>
+      <div class="v" style="font-size: 14px; padding-top: 8px; color: var(--text-dim);">PENDING_START</div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CONTACT ========== -->
+<section id="contact">
+  <div class="section-id">SEC_06</div>
+  <div class="cmd">
+    <span class="prompt">$</span>
+    <span class="verb">whoami</span>
+    <span class="arg">--reach</span>
+    <span class="comment"># let's connect</span>
+  </div>
+
+  <div class="contact-block">
+    <div>
+      <div class="contact-headline">have an <span class="hl">OJT</span> slot or an idea worth building?</div>
+      <p class="contact-sub">Open to On-the-Job Training opportunities, collaborations, and side-project tinkering. Fastest channel is email.</p>
+      <a href="mailto:gulde.jhey8@gmail.com" class="cta">open mail.app</a>
+    </div>
+
+    <div class="contact-info">
+      <div class="ci-row">
+        <div class="k">EMAIL</div>
+        <div class="v"><a href="mailto:gulde.jhey8@gmail.com">gulde.jhey8@gmail.com</a></div>
+      </div>
+      <div class="ci-row">
+        <div class="k">PHONE</div>
+        <div class="v">0926 065 9840</div>
+      </div>
+      <div class="ci-row">
+        <div class="k">GITHUB</div>
+        <div class="v"><a href="https://github.com/Jhey20-sys" target="_blank" rel="noopener">github.com/Jhey20-sys ↗</a></div>
+      </div>
+      <div class="ci-row">
+        <div class="k">LOCATION</div>
+        <div class="v">Zone 6 Tin-Ao Agusan, CDO</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== FOOTER ========== -->
+<footer>
+  <div>© 2026 jhey.gulde · all rights reserved</div>
+  <div class="end">end of file</div>
+</footer>
+
+</main>
+
+<script>
+  const navToggle = document.getElementById('navToggle');
+  const navLinks = document.getElementById('navLinks');
+  navToggle.addEventListener('click', () => navLinks.classList.toggle('open'));
+  navLinks.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => navLinks.classList.remove('open'));
+  });
+
+  // fade-in on scroll
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('section').forEach(s => { s.classList.add('fade-in'); io.observe(s); });
+
+  // live clock in status bar — adds a moving element so the page feels "alive"
+  const statusRight = document.querySelector('.status-right');
+  const clock = document.createElement('div');
+  clock.className = 'status-item status-hide-mobile';
+  clock.innerHTML = '<span class="label">uptime:</span><span class="val" id="clk"></span>';
+  statusRight.prepend(clock);
+  const start = Date.now();
+  function tick() {
+    const s = Math.floor((Date.now() - start) / 1000);
+    const h = String(Math.floor(s / 3600)).padStart(2,'0');
+    const m = String(Math.floor((s % 3600) / 60)).padStart(2,'0');
+    const sec = String(s % 60).padStart(2,'0');
+    const el = document.getElementById('clk');
+    if (el) el.textContent = h + ':' + m + ':' + sec;
+  }
+  tick(); setInterval(tick, 1000);
+</script>
+
+</body>
+</html>
