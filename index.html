@@ -313,6 +313,7 @@
   .cred { padding: 30px 28px; position: relative; transition: transform 0.25s ease, box-shadow 0.25s ease; }
   .cred:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
   .cred.featured {
+    grid-row: span 2;
     background: linear-gradient(155deg, var(--blue-100) 0%, var(--blue-50) 55%, var(--white) 100%);
     border-color: var(--blue-200);
   }
@@ -525,7 +526,7 @@
     .hero-grid, .about-grid { grid-template-columns: 1fr; gap: 48px; }
     .hero-visual { max-width: 340px; }
     .cred-grid { grid-template-columns: 1fr 1fr; }
-    .cred.featured { grid-column: 1 / -1; }
+    .cred.featured { grid-column: 1 / -1; grid-row: auto; }
     .roles { grid-template-columns: 1fr 1fr; }
     .skills-grid { grid-template-columns: 1fr; }
     .feature { grid-template-columns: 1fr; }
@@ -674,6 +675,13 @@
         <div class="issuer">Dept. of Computer Science · USTP–CDO</div>
         <p>Four semesters on the Dean's List, 2023–2025.</p>
       </div>
+      <div class="cred card">
+        <div class="ico">⌬</div>
+        <div class="label">Certificate</div>
+        <h3>CCNA: Introduction to Networks</h3>
+        <div class="issuer">Cisco Networking Academy · USTP–CDO · Jul 2026</div>
+        <p>Network architecture, IP addressing, Ethernet, switching and routing fundamentals, and basic device configuration.</p>
+      </div>
     </div>
   </div>
 </section>
@@ -804,6 +812,10 @@
       <div class="t-item hl">
         <div class="t-date">2026</div>
         <div class="t-card"><div class="type">Certification</div><h4>TOPCIT Level 2 — Practical IT Competency</h4><p>Test of Practical Competency in IT</p></div>
+      </div>
+      <div class="t-item hl">
+        <div class="t-date">2026</div>
+        <div class="t-card"><div class="type">Certificate</div><h4>CCNA: Introduction to Networks</h4><p>Cisco Networking Academy · USTP–CDO</p></div>
       </div>
       <div class="t-item">
         <div class="t-date">2025</div>
